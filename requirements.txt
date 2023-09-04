@@ -48,7 +48,8 @@ lightning-utilities==0.9.0
 multidict==6.0.4
 nltk==3.8.1
 packaging==23.1
-pillow==10.0.0
+# pillow==10.0.0  # you should use <10.0.0 version as ANTIALIAS was depreciated in the version
+Pillow==9.5.0
 pytorch-lightning==1.9.5
 pyyaml==6.0.1
 regex==2023.8.8
@@ -108,6 +109,7 @@ yapf==0.32.0
 easyocr==1.7.0
 pyrealsense2==2.54.1.5217
 lmdb==1.4.1
+
 
 ### mmcv install
 # pip install -U openmim
