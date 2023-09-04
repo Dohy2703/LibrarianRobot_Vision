@@ -14,7 +14,5 @@ fast weight file : [weights.pth](https://drive.google.com/file/d/12m4aaSBvcU_23w
 
 ### LibrarianRobot_Vision
 ㄴ fast_demo <br/>
-
-  ㄴ model  <br/>
-
-    ㄴ weights.pth   <-- put here !
+ ㄴ model  <br/>
+  ㄴ weights.pth   <-- put here !
