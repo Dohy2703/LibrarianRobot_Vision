@@ -16,7 +16,7 @@ realsense = True  # 지역변수 오류때문에 미리 선언해둠
 status = 0
 wait = False
 find_word = 624875 # 625223 # 623400
-ip, port = '127.0.1.1', 2015
+ip, port = '***.*.*.*', 2015
 
 if __name__ == '__main__':
     kdh = True
