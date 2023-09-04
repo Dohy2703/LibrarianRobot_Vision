@@ -12,7 +12,7 @@ sample video file : [book_detection.mp4](https://drive.google.com/file/d/1wSLc7O
 ### fast weight file
 fast weight file : [weights.pth](https://drive.google.com/file/d/12m4aaSBvcU_23w8obVT6BsfyBfM5wC_l/view?usp=sharing)
 
-### LibrarianRobot_Vision
-ㄴ fast_demo <br/>
- ㄴ model  <br/>
-  ㄴ weights.pth   <-- put here !
+LibrarianRobot_Vision
+ ㄴ fast_demo <br/>
+  ㄴ model  <br/>
+   ㄴ weights.pth   <-- put here !
