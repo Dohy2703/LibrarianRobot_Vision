@@ -1,19 +1,21 @@
-import easyocr
 import numpy as np
 import cv2
+import easyocr
 import numpy.linalg as LA
 import math as m
 import traceback
+from label_reader import labelReader
 
 
-class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
-    # def __init__(self,calib_data_path): # calib_data를 처음에 선언하고 기억하는게 바람직해 보임
-    def __init__(self, calib_data_path):  # calib_data를 처음에 선언하고 기억하는게 바람직해 보임
+class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 클래스
+    def __init__(self,calib_data_path):  # calib_data를 처음에 선언하고 기억하는게 바람직해 보임
         #################realsense 객체#############################################
+        super().__init__()
+
         self.distance_frame = 0  # raw depth map/ not a numpy data
         self.color_image = np.array([])
-        self.depth_image = np.array([])  # depth_color_image로 변환된 데이터
-        self.gray_image = np.array([])  # 글자 읽을 때 사용
+        self.depth_image = np.array([]) # depth_color_image로 변환된 데이터
+        self.gray_image = np.array([]) # 글자 읽을 때 사용
         self.depth_scale = 0
 
         self.book_idx = None
@@ -35,7 +37,7 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
         self.BL_corner = np.array([])  # 책과 레이블의 코너점_ minareaRect로 뽑은 corner점
 
         if calib_data_path != 0:
-            calib_data = np.load(calib_data_path)  # 추가할 정보
+            calib_data = np.load(calib_data_path) # 추가할 정보
             self.dist_coef = calib_data["distCoef"]
             self.cam_mat = calib_data["camMatrix"]
 
@@ -68,7 +70,7 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
         self.gray_image = cv2.cvtColor(self.color_image.copy(), cv2.COLOR_BGR2GRAY)  # 글자 읽을 때 필요함
         self.origin_h, self.origin_w, _ = self.color_image.shape  # reshape(선택사항)
 
-    def get_mask(self, det, masks, names, resize=False) -> int:
+    def get_mask(self, det, masks, names, resize=False, tracking=False) -> int:
         '''
         마스크를 가져와 self에 저장.
         라벨지만 따로 분리하여 saliency map 생성
@@ -77,6 +79,7 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
         :param masks: 검출된 이진마스크 리스트
         :param names: 이름 리스트
         :param resize: 원본 크기로 resize할 지 여부
+        :param tracking : 트래킹할 때는 연산을 최소화
         :return: 0:책과 라벨지 검출, 1:라벨지만 검출, 2:책만 검출, 3:둘다 검출X
         '''
         det_len = len(det)
@@ -146,8 +149,21 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
                 label_cnt += 1
 
         if resize:
-            self.gray_image = cv2.resize(self.gray_image, (self.origin_w, self.origin_h))
-        label_masks *= self.gray_image
+            # self.gray_image = cv2.resize(self.gray_image, (self.origin_w, self.origin_h))
+            self.color_image = cv2.resize(self.color_image, (self.origin_w, self.origin_h))
+
+        if not tracking:  # 트래킹일 때는 이 부분 비활성화시켜서 연산 빠르게
+            b_ch, g_ch, r_ch = cv2.split(self.color_image)
+            # label_masks *= self.gray_image
+            b_label_masks = label_masks.copy()
+            g_label_masks = label_masks.copy()
+            r_label_masks = label_masks.copy()
+
+            b_label_masks *= b_ch
+            g_label_masks *= b_ch
+            r_label_masks *= b_ch
+
+            label_masks = cv2.merge((b_label_masks, g_label_masks, r_label_masks))
 
         self.det = det
         self.masks = masks
@@ -188,17 +204,22 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
 
         # 글자 읽기
         reader = easyocr.Reader(['en'])  # 한글도 적용하고 싶으면 ['ko', 'en']. 다만 여기선 자음만 인식 안돼서 안씀
-        result = reader.readtext(sharpening_img,
-                                 slope_ths=0.3)  # result = reader.readtext(self.label_masks, slope_ths=0.3)
+        result = reader.readtext(sharpening_img, slope_ths=0.3)  # result = reader.readtext(self.label_masks, slope_ths=0.3)
 
         # word(찾는 글자)가 있는지 판단, 있으면 해당 책의 마스크 반환
-        for i in range(len(result)):
-            if visualize and '6' in result[i][1]:  # 확인용
-                print(result[i][1])
 
-            if word in result[i][1]:  # 'find-detect mode 0'
-                word_x = int((result[i][0][0][0] + result[i][0][2][0]) / 2)
-                word_y = int((result[i][0][0][1] + result[i][0][2][1]) / 2)
+        self.FAST_crop(self.label_masks)
+        self.read_text_easyocr()
+        recog_result = self.parseq_recognize()
+
+        for result in recog_result:
+            if visualize:  # 확인용
+                print(result)
+
+            ######## bbox 좌표를 얻어야됨
+            if word in result[0]:  # 'find-detect mode 0'
+                word_x = int((result[1] + result[3]) / 2)
+                word_y = int((result[2] + result[4]) / 2)
                 dist_min = 1E6
                 for j, item in enumerate(self.label_list):  # 글자와 라벨지 간의 최소 거리로 글자에 해당하는 라벨지 찾기
                     dist = (item[0] - word_x) ** 2 + (item[1] - word_y) ** 2
@@ -218,8 +239,7 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
                     self.L_corner = box
 
                 if resize:
-                    find_label = cv2.resize(self.masks[self.label_idx].byte().cpu().numpy() * 255,
-                                            (self.origin_w, self.origin_h))
+                    find_label = cv2.resize(self.masks[self.label_idx].byte().cpu().numpy() * 255, (self.origin_w, self.origin_h))
                 else:
                     find_label = self.masks[self.mask_label_idx[dist_min_idx]].byte().cpu().numpy() * 255
 
@@ -452,6 +472,7 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
         box = cv2.boxPoints(rect)
         box = np.int0(box)
         self.BL_corner = box
+
         # 시각화
         if visualize:
             cv2.circle(trackB, (int(self.BC_point[0]), int(self.BC_point[1])), 2, (0, 0, 0), 2)
@@ -537,19 +558,18 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
 
         # 글자 읽기
         reader = easyocr.Reader(['en'])  # 한글도 적용하고 싶으면 ['ko', 'en']. 다만 여기선 자음만 인식 안돼서 안씀
-        result = reader.readtext(center_label,
-                                 slope_ths=0.3)  # result = reader.readtext(self.label_masks, slope_ths=0.3)
+        result = reader.readtext(center_label, slope_ths=0.3) # result = reader.readtext(self.label_masks, slope_ths=0.3)
 
         found_word = []
         for read_word in result:
-            if ('.' not in read_word[1]) and len(read_word[1]) >= 6:  # 확인용
+            if ('.' not in read_word[1]) and len(read_word[1])>=6:  # 확인용
                 if read_word[1][-6:].isdigit():
                     found_word.append(read_word[1])
 
         self.center_word = None
 
         if len(found_word) == 1:
-            self.center_word = found_word[0][-6:]
+            self.center_word = found_word[0][-6:] # 6 글자
         else:
             for j in found_word:
                 if ('Em' not in j) and ('EM' not in j):
@@ -581,7 +601,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
         np.putmask(box[:, 0], box[:, 0] <= 0, 0)
         np.putmask(box[:, 1], box[:, 1] <= 0, 0)
         return box
-
     # def rearrange_all(self, box, color, visual=False):  # 바운딩 박스를 순서에 맞게 재정렬 / box: 4개의 점을 담은 리스트
     #     # 수정점: 책이 없고 레이블만검출 되었을때는 오류가 뜰수밖에 없음
     #     # 해결책: 레이블지만 검출됬을때 쓸수있는 방법 모색
@@ -704,7 +723,7 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
 
     def rearrange_all(self, box, color, visual=False):  # 바운딩 박스를 순서에 맞게 재정렬 / box: 4개의 점을 담은 리스트
 
-        # 수정점: 책이 없고 레이블만검출 되었을때는 오류가 뜰수밖에 없음
+    # 수정점: 책이 없고 레이블만검출 되었을때는 오류가 뜰수밖에 없음
         # 해결책: 레이블지만 검출됬을때 쓸수있는 방법 모색
         '''
         :param box : 4개의 점
@@ -823,7 +842,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
             # print(err_msg)
             print("Rearrange_all_error")
             return False
-
     def rearrange_one(self, box, color, visual=False):  # 하나의 물체만
         '''
         :param box : 4개의 점
@@ -886,7 +904,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
             err_msg = traceback.format_exc()
             print("Rearrange\n", err_msg)
             return False
-
     def inner_point(self, corner_aligned, color, visual=False):
         '''
         :param : corner_aligned = 정렬된 코너점 입력
@@ -929,7 +946,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
 
             corner_in = [P_LD_in, P_LU_in, P_RD_in, P_RU_in]
             return corner_in
-
     def convert_3d(self, point2d):  # 2차원 데이터를 3차원로 변환 / 검증 필요!!
         '''
         :param point2d np.array([x,y])
@@ -947,7 +963,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
         yw = yc_normal * distance
         point3d = np.array([xw, yw, distance])
         return point3d
-
     def convert_3d_corner(self, box):  # box =[P_LD_in, P_LU_in, P_RD_in, P_RU_in]
         '''
         param: point2d x4 = corner point2d
@@ -960,7 +975,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
             return point3d
         else:
             return False
-
     def calc_ang(self, lc_point, blc_point, visual=False):
         '''
         :param: label의 2d 포인트, blc의 2d 포인트
@@ -997,19 +1011,22 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
             if np.cross(Vy_cam, Vy_object) > 0:  # 시계방향으로 돌림.
                 ang = round(m.degrees(np.arccos(np.dot(Vy_object, Vy_cam))), 3)
             elif np.cross(Vy_cam, Vy_object) < 0:  # 시계반대 방향 돌림.
-                ang = - round(m.degrees(np.arccos(np.dot(Vy_object, Vy_cam))), 3)
+                ang = -round(m.degrees(np.arccos(np.dot(Vy_object, Vy_cam))), 3)
             elif np.cross(Vy_cam, Vy_object) == 0:
                 if any(Vy_object == Vy_cam):  # any() or all()
                     ang = 0
                 else:
                     ang = 180
+            if ang > 180:
+                ang = ang-180
+            elif ang < -180:
+                ang = ang+180
             return ang
 
         except:
 
             print("calc_ang  =", Vy_object, LA.norm(Vy_object))
             return False
-
     def isAvail_depth(self, corner_3d):  # 3차원 데이터 4개 /  depth값이 유효하지 않은 값이 들어가는지 확인
         P_LD_in, P_LU_in, P_RD_in, P_RU_in = corner_3d[0], corner_3d[1], corner_3d[2], corner_3d[3]
         # print(P_LD_in[2],P_LU_in[2],P_RD_in[2],P_RU_in[2])
@@ -1017,7 +1034,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
             return True
         else:
             return False
-
     def calc_ori(self, corner_arrange_in):  # 정렬된 포인트 배열들을이용해 orientation을 구함
         ''' 잦은 에러: norm(vx),norm(vy)=0 이 되는 경우
         :param corner_arrange_in: 안쪽에 있는 점을 기준으로 orientation계산  한 포인트당 3d
@@ -1030,7 +1046,7 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
             # print(corner_arrange_in)
             if self.isAvail_depth(corner_arrange_in):
                 P_LD_in, P_LU_in, P_RD_in, P_RU_in = corner_arrange_in[0], corner_arrange_in[1], corner_arrange_in[2], \
-                    corner_arrange_in[3]
+                corner_arrange_in[3]
                 vx = P_RD_in - P_LD_in
                 vy = P_LD_in - P_LU_in
                 '''debugging'''
@@ -1049,7 +1065,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
                 return rotation
         else:
             return False
-
     def euler_rot(self, theta):  # euler rotation : z-y-x : 3x3 matrix
         theta1, theta2, theta3 = theta[0], theta[1], theta[2]
         rot_z = np.matrix([[m.cos(theta1), -m.sin(theta1), 0],
@@ -1063,7 +1078,6 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
                            [0, m.sin(theta3), m.cos(theta3)]])
         rot = np.dot(np.dot(rot_z, rot_y), rot_x)
         return rot
-
     def visual_coord(self, Rvec, Tvec):  # 책의 코디네이트 #
         # print('out= ', type(Rvec), type(Tvec))
         # print('in= ', type(Rvec), type(Tvec))
@@ -1077,10 +1091,11 @@ class DetectBook:  # 책의 특징점을 찾아서 tf를 만드는 클래스
             print('visual fail')
             return False
 
-
 if __name__ == '__main__':
-    # db = DetectBook()
-    print("hello world!")
+    db = DetectBook(0)
+    print("error check done. \nhello world!")
+
+
 
 
 
