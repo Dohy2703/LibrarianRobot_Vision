@@ -36,12 +36,15 @@ LibrarianRobot_Vision <br/>
   ㄴ model  <br/>
    ㄴ weights.pth   <-- put here !
 
+### Text detection + recognition 
+
+
 ## Reference
-**instance segmentation model**
-ultralytics/ultralytics - https://github.com/ultralytics/ultralytics
-**text detection model**
-czczup/FAST - https://github.com/czczup/FAST
-**text recognition model 1**
-JaidedAI/EasyOCR - https://github.com/JaidedAI/EasyOCR
-**text recognition model 1**
-baudm/parseq - https://github.com/baudm/parseq
+**instance segmentation model** <br/>
+ultralytics/ultralytics - https://github.com/ultralytics/ultralytics <br/>
+**text detection model** <br/>
+czczup/FAST - https://github.com/czczup/FAST <br/>
+**text recognition model 1** <br/>
+JaidedAI/EasyOCR - https://github.com/JaidedAI/EasyOCR <br/>
+**text recognition model 2** <br/>
+baudm/parseq - https://github.com/baudm/parseq <br/>
