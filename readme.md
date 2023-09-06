@@ -6,7 +6,7 @@ Vision part : <br/>
   depth cam calibration + robot arm image processing (chadChang) <br/> <br/>
 
 ## model structure
-<img src="[https://url/image.png](https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/945e3783-cd1f-447d-be5b-d45da38509f2)" width="500" height="160"/>
+<img src="![https://url/image.png](https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/945e3783-cd1f-447d-be5b-d45da38509f2)" width="500" height="160"/>
 
 
 ## installation
