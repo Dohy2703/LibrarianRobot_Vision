@@ -43,7 +43,7 @@ LibrarianRobot_Vision <br/>
 <img src="https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/aa136a65-1340-4276-b5ad-ccf20956d905" width="500" height="160"/>
 
 ### Text detection + recognition 
-<img src="https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/713a3cfb-bf43-49a2-a2cc-829210964c57" width="500" height="250"/>
+<img src="https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/713a3cfb-bf43-49a2-a2cc-829210964c57" width="500" height="250"/> <br/>
 I used 3 models to increase both accuracy and speed of OCR <br/>
 
 ## Reference
