@@ -2,8 +2,8 @@
 **Seoultech university / Mechanical System Design Engineering / Capstone Design 2023** <br/>
 Team : FakeSign <br/>
 Vision part : <br/>
-  deeplearning network + image processing (dohy2703) <br/>
-  depth cam calibration + robot arm image processing (chadChang) <br/> <br/>
+  deeplearning network + image processing (dohy2703) <br/>
+  depth cam calibration + robot arm image processing (chadChang) <br/> <br/>
 
 ## model structure
 
