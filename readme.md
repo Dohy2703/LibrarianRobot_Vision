@@ -9,7 +9,7 @@ Vision part : <br/>
 <img src="https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/8554f3ca-9c27-4209-9194-0e6fd57e5505" width="750" height="350"/>
 
 ## Test environment
-
+Depth Camera D435 - Intel RealSense <br/>
 NVIDIA GEFORCE RTX 3050<br/>
 pytorch==2.0.1, CUDA==11.7, conda env python==3.8<br/>
 
