@@ -37,8 +37,8 @@ LibrarianRobot_Vision <br/>
    ㄴ weights.pth   <-- put here !
 
 ### Text detection + recognition 
-<img src="[https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/945e3783-cd1f-447d-be5b-d45da38509f2](https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/daa7b2e1-c376-45c3-8ed6-52c0648d6310)" width="500" height="250"/>
-I used 3 models to raise both accuracy and speed of OCR <br/>
+<img src="https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/daa7b2e1-c376-45c3-8ed6-52c0648d6310" width="500" height="250"/>
+I used 3 models to increase both accuracy and speed of OCR <br/>
 
 ## Reference
 **instance segmentation model** <br/>
