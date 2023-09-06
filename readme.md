@@ -5,11 +5,15 @@ Vision part : <br/>
   deeplearning network + image processing (dohy2703) <br/>
   depth cam calibration + robot arm image processing (chadChang) <br/> <br/>
 
-## model structure
+## Model structure
 <img src="https://github.com/Dohy2703/LibrarianRobot_Vision/assets/125836071/945e3783-cd1f-447d-be5b-d45da38509f2" width="750" height="350"/>
 
+## Test environment
 
-## installation
+NVIDIA GEFORCE RTX 3050<br/>
+pytorch==2.0.1, CUDA==11.7, conda env python==3.8<br/>
+
+## Installation
 
     $ cd LibrarianRobot_Vision
     $ pip install -r requirements.txt
@@ -31,3 +35,13 @@ LibrarianRobot_Vision <br/>
  ㄴ fast_demo <br/>
   ㄴ model  <br/>
    ㄴ weights.pth   <-- put here !
+
+## Reference
+**instance segmentation model**
+ultralytics/ultralytics - https://github.com/ultralytics/ultralytics
+**text detection model**
+czczup/FAST - https://github.com/czczup/FAST
+**text recognition model 1**
+JaidedAI/EasyOCR - https://github.com/JaidedAI/EasyOCR
+**text recognition model 1**
+baudm/parseq - https://github.com/baudm/parseq
