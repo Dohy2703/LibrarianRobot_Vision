@@ -11,11 +11,11 @@ Vision part : <br/>
 
 ## installation
 
-    $ cd LibrarianRobot_Vision <br/>
-    $ pip install -r requirements.txt <br/>
+    $ cd LibrarianRobot_Vision
+    $ pip install -r requirements.txt
 
-    $ cd model/fast_demo/model/post_processing/ccl<br/>
-    $ python setup.py build_ext --inplace <br/> <br/>
+    $ cd model/fast_demo/model/post_processing/ccl
+    $ python setup.py build_ext --inplace
 
 
 ### ultralytics weight file
