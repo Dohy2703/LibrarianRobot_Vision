@@ -174,4 +174,3 @@ if __name__ == '__main__':
 
     end_t = time.time()
     print('infer time : ', end_t - start_t)
-
