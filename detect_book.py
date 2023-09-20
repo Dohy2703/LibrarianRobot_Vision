@@ -601,6 +601,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
         np.putmask(box[:, 0], box[:, 0] <= 0, 0)
         np.putmask(box[:, 1], box[:, 1] <= 0, 0)
         return box
+
     # def rearrange_all(self, box, color, visual=False):  # 바운딩 박스를 순서에 맞게 재정렬 / box: 4개의 점을 담은 리스트
     #     # 수정점: 책이 없고 레이블만검출 되었을때는 오류가 뜰수밖에 없음
     #     # 해결책: 레이블지만 검출됬을때 쓸수있는 방법 모색
@@ -723,7 +724,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
 
     def rearrange_all(self, box, color, visual=False):  # 바운딩 박스를 순서에 맞게 재정렬 / box: 4개의 점을 담은 리스트
 
-    # 수정점: 책이 없고 레이블만검출 되었을때는 오류가 뜰수밖에 없음
+        # 수정점: 책이 없고 레이블만검출 되었을때는 오류가 뜰수밖에 없음
         # 해결책: 레이블지만 검출됬을때 쓸수있는 방법 모색
         '''
         :param box : 4개의 점
@@ -842,6 +843,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
             # print(err_msg)
             print("Rearrange_all_error")
             return False
+
     def rearrange_one(self, box, color, visual=False):  # 하나의 물체만
         '''
         :param box : 4개의 점
@@ -904,6 +906,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
             err_msg = traceback.format_exc()
             print("Rearrange\n", err_msg)
             return False
+
     def inner_point(self, corner_aligned, color, visual=False):
         '''
         :param : corner_aligned = 정렬된 코너점 입력
@@ -929,23 +932,28 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
 
             if visual:
                 cv2.circle(image, (int(P_LD_in[0]), int(P_LD_in[1])), 2, color, 2)
-                cv2.putText(image, 'LD' + str(P_LD_in), (int(P_LD_in[0]), int(P_LD_in[1])), cv2.FONT_ITALIC, 0.5, color,
+                cv2.putText(image, 'LD' + str(P_LD_in), (int(P_LD_in[0]), int(P_LD_in[1])), cv2.FONT_ITALIC, 0.5,
+                            color,
                             1)
 
                 cv2.circle(image, (int(P_RD_in[0]), int(P_RD_in[1])), 2, color, 2)
-                cv2.putText(image, 'RD' + str(P_RD_in), (int(P_RD_in[0]), int(P_RD_in[1])), cv2.FONT_ITALIC, 0.5, color,
+                cv2.putText(image, 'RD' + str(P_RD_in), (int(P_RD_in[0]), int(P_RD_in[1])), cv2.FONT_ITALIC, 0.5,
+                            color,
                             1)
 
                 cv2.circle(image, (int(P_LU_in[0]), int(P_LU_in[1])), 2, color, 2)
-                cv2.putText(image, 'LU' + str(P_LU_in), (int(P_LU_in[0]), int(P_LU_in[1])), cv2.FONT_ITALIC, 0.5, color,
+                cv2.putText(image, 'LU' + str(P_LU_in), (int(P_LU_in[0]), int(P_LU_in[1])), cv2.FONT_ITALIC, 0.5,
+                            color,
                             1)
 
                 cv2.circle(image, (int(P_RU_in[0]), int(P_RU_in[1])), 2, color, 2)
-                cv2.putText(image, 'RU' + str(P_RU_in), (int(P_RU_in[0]), int(P_RU_in[1])), cv2.FONT_ITALIC, 0.5, color,
+                cv2.putText(image, 'RU' + str(P_RU_in), (int(P_RU_in[0]), int(P_RU_in[1])), cv2.FONT_ITALIC, 0.5,
+                            color,
                             1)
 
             corner_in = [P_LD_in, P_LU_in, P_RD_in, P_RU_in]
             return corner_in
+
     def convert_3d(self, point2d):  # 2차원 데이터를 3차원로 변환 / 검증 필요!!
         '''
         :param point2d np.array([x,y])
@@ -963,6 +971,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
         yw = yc_normal * distance
         point3d = np.array([xw, yw, distance])
         return point3d
+
     def convert_3d_corner(self, box):  # box =[P_LD_in, P_LU_in, P_RD_in, P_RU_in]
         '''
         param: point2d x4 = corner point2d
@@ -975,6 +984,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
             return point3d
         else:
             return False
+
     def calc_ang(self, lc_point, blc_point, visual=False):
         '''
         :param: label의 2d 포인트, blc의 2d 포인트
@@ -1018,15 +1028,18 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
                 else:
                     ang = 180
             if ang > 180:
-                ang = ang-180
+                ang = ang - 180
             elif ang < -180:
-                ang = ang+180
+                ang = ang + 180
+            if ang == 0:
+                return 'z'
             return ang
 
         except:
 
             print("calc_ang  =", Vy_object, LA.norm(Vy_object))
             return False
+
     def isAvail_depth(self, corner_3d):  # 3차원 데이터 4개 /  depth값이 유효하지 않은 값이 들어가는지 확인
         P_LD_in, P_LU_in, P_RD_in, P_RU_in = corner_3d[0], corner_3d[1], corner_3d[2], corner_3d[3]
         # print(P_LD_in[2],P_LU_in[2],P_RD_in[2],P_RU_in[2])
@@ -1034,6 +1047,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
             return True
         else:
             return False
+
     def calc_ori(self, corner_arrange_in):  # 정렬된 포인트 배열들을이용해 orientation을 구함
         ''' 잦은 에러: norm(vx),norm(vy)=0 이 되는 경우
         :param corner_arrange_in: 안쪽에 있는 점을 기준으로 orientation계산  한 포인트당 3d
@@ -1045,8 +1059,9 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
             color = (255, 0, 0)
             # print(corner_arrange_in)
             if self.isAvail_depth(corner_arrange_in):
-                P_LD_in, P_LU_in, P_RD_in, P_RU_in = corner_arrange_in[0], corner_arrange_in[1], corner_arrange_in[2], \
-                corner_arrange_in[3]
+                P_LD_in, P_LU_in, P_RD_in, P_RU_in = corner_arrange_in[0], corner_arrange_in[1], corner_arrange_in[
+                    2], \
+                    corner_arrange_in[3]
                 vx = P_RD_in - P_LD_in
                 vy = P_LD_in - P_LU_in
                 '''debugging'''
@@ -1065,6 +1080,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
                 return rotation
         else:
             return False
+
     def euler_rot(self, theta):  # euler rotation : z-y-x : 3x3 matrix
         theta1, theta2, theta3 = theta[0], theta[1], theta[2]
         rot_z = np.matrix([[m.cos(theta1), -m.sin(theta1), 0],
@@ -1078,6 +1094,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
                            [0, m.sin(theta3), m.cos(theta3)]])
         rot = np.dot(np.dot(rot_z, rot_y), rot_x)
         return rot
+
     def visual_coord(self, Rvec, Tvec):  # 책의 코디네이트 #
         # print('out= ', type(Rvec), type(Tvec))
         # print('in= ', type(Rvec), type(Tvec))
@@ -1092,9 +1109,8 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
             return False
 
 if __name__ == '__main__':
-    db = DetectBook(0)
-    print("error check done. \nhello world!")
-
+    # db = DetectBook()
+    print("hello world!")
 
 
 
