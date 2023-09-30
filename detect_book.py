@@ -72,9 +72,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
 
     def get_mask(self, det, masks, names, resize=False, tracking=False) -> int:
         '''
-        마스크를 가져와 self에 저장.
-        라벨지만 따로 분리하여 saliency map 생성
-
+        마스크를 가져와 self에 저장. 라벨지만 따로 분리하여 saliency map 생성
         :param det: 검출된 bbox 리스트
         :param masks: 검출된 이진마스크 리스트
         :param names: 이름 리스트
@@ -203,8 +201,8 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
             cv2.imshow('sharpening_mask', sharpening_img)
 
         # 글자 읽기
-        reader = easyocr.Reader(['en'])  # 한글도 적용하고 싶으면 ['ko', 'en']. 다만 여기선 자음만 인식 안돼서 안씀
-        result = reader.readtext(sharpening_img, slope_ths=0.3)  # result = reader.readtext(self.label_masks, slope_ths=0.3)
+        # reader = easyocr.Reader(['en'])  # 한글도 적용하고 싶으면 ['ko', 'en']. 다만 여기선 자음만 인식 안돼서 안씀
+        # result = reader.readtext(sharpening_img, slope_ths=0.3)  # result = reader.readtext(self.label_masks, slope_ths=0.3)
 
         # word(찾는 글자)가 있는지 판단, 있으면 해당 책의 마스크 반환
 
@@ -1111,6 +1109,7 @@ class DetectBook(labelReader):  # 책의 특징점을 찾아서 tf를 만드는 
 if __name__ == '__main__':
     # db = DetectBook()
     print("hello world!")
+
 
 
 
